@@ -18,6 +18,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Tarefa> tarefas = [];
   Prioridade prioridade = Prioridade.normal;
+  DateTime dataSelecionada = DateTime.now();
+  bool isPesquisaPorData = false;
 
   getPrioridadeSelecionada() {
     var prioridadeSelected =
@@ -37,7 +39,31 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    tarefas = ListaTarefas.getTarefasPrioridade(getPrioridadeSelecionada());
+    if (!isPesquisaPorData) {
+      tarefas = ListaTarefas.getTarefasPrioridade(getPrioridadeSelecionada());
+    } else {
+      isPesquisaPorData = false;
+    }
+
+    _showDatePicker() {
+      showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2023))
+          .then((pickedDate) {
+        if (pickedDate == null) {
+          return;
+        }
+        setState(() {
+          dataSelecionada = pickedDate;
+          tarefas = ListaTarefas.getTarefasByDateAndPriority(
+              prioridade, dataSelecionada);
+          isPesquisaPorData = true;
+        });
+      });
+    }
+
     return Scaffold(
       body: SafeArea(
           child: Column(
@@ -57,9 +83,15 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 20),
           Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child:
-                  PrioridadesList(prioridade: prioridade, setState: setState)),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+            children: [
+              Expanded(
+                  child: PrioridadesList(
+                      prioridade: prioridade, setState: setState)),
+              itemData(_showDatePicker),
+            ],
+          )),
           const SizedBox(height: 20),
           Expanded(
             child: tarefas.isEmpty
@@ -71,9 +103,9 @@ class _HomePageState extends State<HomePage> {
       )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-            updateCategorySelected(Prioridade.normal);
-            showModalBottomSheet(
-            context: context, builder: (context) => const ModalAddTarefa());
+          updateCategorySelected(Prioridade.normal);
+          showModalBottomSheet(
+              context: context, builder: (context) => const ModalAddTarefa());
         },
         tooltip: 'Increment',
         backgroundColor: Colors.black,
@@ -97,9 +129,12 @@ class _HomePageState extends State<HomePage> {
               activeColor: Colors.black,
               value: tarefas[index].isConcluida,
               onChanged: (bool? newValue) {
-                setState(() => {
-                      tarefas[index].isConcluida = newValue ?? false,
-                    });
+                setState(() {
+                  tarefas[index].isConcluida = newValue ?? false;
+                  if (tarefas[index].isConcluida) {
+                    ListaTarefas.removeTarefa(tarefas[index].id);
+                  }
+                });
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(3)),
@@ -141,8 +176,8 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     color: tarefas[index].isConcluida == true
                         ? Colors.grey
-                        : Colors.black,
-                    fontSize: 18,
+                        : getPropriedadeColor(tarefas[index].prioridade),
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     decoration: tarefas[index].isConcluida == true
                         ? TextDecoration.lineThrough
@@ -151,7 +186,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 5),
               Text(DateFormat('d MMM y').format(tarefas[index].dataFinalizacao),
                   style: TextStyle(
-                      color: tarefaNaoAtrasada ? Colors.black : Colors.red[400],
+                      color: tarefaNaoAtrasada ? Colors.black : Colors.red,
                       fontSize: 15,
                       fontWeight: FontWeight.bold)),
             ],
@@ -167,6 +202,29 @@ class _HomePageState extends State<HomePage> {
           //   ),
         );
       },
+    );
+  }
+
+  Container itemData(Function _showDatePicker) {
+    return Container(
+      margin: const EdgeInsets.only(right: 10),
+      height: 50,
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: Colors.black),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TextButton(
+        onPressed: () {
+          _showDatePicker();
+        },
+        child: const Text(
+          "Data",
+          style: TextStyle(
+              fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ),
     );
   }
 }

@@ -18,20 +18,20 @@ class PrioridadesList extends StatelessWidget {
         itemCount: listPrioridades.length,
         itemBuilder: (BuildContext ctxt, int index) {
           var category = listPrioridades[index];
-          return itemPrioridade(category['prioridade'], category['text'], category['isSelected']);
+          return itemPrioridade(category['prioridade'], category['text'], category['isSelected'], category['color']);
         },
       ),
     );
   }
 
-  Container itemPrioridade(var prioridadeItem, var label, var isSelected) {
+  Container itemPrioridade(var prioridadeItem, var label, var isSelected, var color) {
     return Container(
     margin: const EdgeInsets.only(right: 10),
     height: 10,
     padding: const EdgeInsets.symmetric(horizontal: 2),
     decoration: BoxDecoration(
-      color: isSelected ? Colors.black : Colors.transparent,
-      border: Border.all(color: Colors.black),
+      color: isSelected ? color : Colors.transparent,
+      border: Border.all(color: isSelected ? Colors.transparent : Colors.black),
       borderRadius: BorderRadius.circular(20),
     ),
     child: TextButton(

@@ -12,13 +12,13 @@ var listPrioridades = [
   {
     'prioridade': Prioridade.alta,
     'text': 'Alta',
-    'color': Colors.red,
+    'color': Colors.red[400],
     'isSelected': false,
   },
   {
     'prioridade': Prioridade.normal,
     'text': 'Normal',
-    'color': Colors.black,
+    'color': Colors.amber[400],
     'isSelected': true,
   },
   {
@@ -39,5 +39,18 @@ getPrioridadeTitulo(Prioridade prioridade) {
       return "Baixa";
     default:
       return "";
+  }
+}
+
+getPropriedadeColor(Prioridade prioridade) {
+  switch (prioridade) {
+    case Prioridade.alta:
+      return Colors.red[400];
+    case Prioridade.normal:
+      return Colors.amber[400];
+    case Prioridade.baixa:
+      return Colors.blue;
+    default:
+      return Colors.black;
   }
 }
